@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../../components/already_have_an_account_acheck.dart';
-import 'package:go_router/go_router.dart';
 import '../../../constants.dart';
 import '../../screens/signup_screen.dart';
+import 'package:myapp/api/api_client.dart';
+import 'package:myapp/api/api_endpoints.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _apiClient = ApiClient();
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +25,10 @@ class LoginForm extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
-            keyboardType: TextInputType.emailAddress,
+            controller: _usernameController,
+            keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,
-            onSaved: (email) {},
             decoration: const InputDecoration(
               hintText: "Username",
               prefixIcon: Padding(
@@ -28,6 +40,7 @@ class LoginForm extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: defaultPadding),
             child: TextFormField(
+              controller: _passwordController,
               textInputAction: TextInputAction.done,
               obscureText: true,
               cursorColor: kPrimaryColor,
@@ -40,10 +53,42 @@ class LoginForm extends StatelessWidget {
               ),
             ),
           ),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: defaultPadding / 2),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
           const SizedBox(height: defaultPadding),
           ElevatedButton(
-            onPressed: () {
-              GoRouter.of(context).goNamed('main');
+            onPressed: () async {
+              setState(() {
+                _errorMessage = null;
+              });
+              try {
+                final response = await _apiClient.login(
+                  ApiEndpoints.login(),
+                  data: {
+                    'username': _usernameController.text,
+                    'password': _passwordController.text,
+                  },
+                );
+                // Assuming successful login returns a token or user data
+                if (response.containsKey('token')) {
+                  // Navigate to the main screen on successful login
+                  GoRouter.of(context).goNamed('main');
+                } else {
+                  setState(() {
+                    _errorMessage = 'Unexpected response format';
+                  });
+                }
+              } catch (e) {
+                setState(() {
+                  _errorMessage = e.toString();
+                });
+              }
             },
             child: Text("Login".toUpperCase()),
           ),
