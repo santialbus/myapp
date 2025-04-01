@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/components/responsive.dart';
+import '../components/socal_sign_up.dart';
 import '../../components/background.dart';
 import 'components/login_form.dart';
 import 'components/login_screen_top_image.dart';
@@ -21,7 +22,14 @@ class LoginScreen extends StatelessWidget {
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [SizedBox(width: 450, child: LoginForm())],
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(width: 450, child: LoginForm()),
+                        SocalSignUp(),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -44,6 +52,7 @@ class MobileLoginScreen extends StatelessWidget {
         Row(
           children: [Spacer(), Expanded(flex: 8, child: LoginForm()), Spacer()],
         ),
+        SocalSignUp(),
       ],
     );
   }

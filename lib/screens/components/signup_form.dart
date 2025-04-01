@@ -13,6 +13,35 @@ class SignUpForm extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
+            keyboardType: TextInputType.name,
+            textInputAction: TextInputAction.next,
+            cursorColor: kPrimaryColor,
+            onSaved: (firstName) {},
+            decoration: const InputDecoration(
+              hintText: "First Name",
+              prefixIcon: Padding(
+                padding: EdgeInsets.all(defaultPadding),
+                child: Icon(Icons.account_circle),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: defaultPadding),
+            child: TextFormField(
+              keyboardType: TextInputType.name,
+              textInputAction: TextInputAction.next,
+              cursorColor: kPrimaryColor,
+              onSaved: (lastName) {},
+              decoration: const InputDecoration(
+                hintText: "Last Name",
+                prefixIcon: Padding(
+                  padding: EdgeInsets.all(defaultPadding),
+                  child: Icon(Icons.account_circle),
+                ),
+              ),
+            ),
+          ),
+          TextFormField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,

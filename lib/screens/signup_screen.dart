@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:myapp/constants.dart';
 import 'package:myapp/components/responsive.dart';
 import '../../components/background.dart';
-import '../../components/socal_sign_up.dart';
 import 'components/signup_form.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -23,7 +22,6 @@ class SignUpScreen extends StatelessWidget {
                   children: [
                     SizedBox(width: 450, child: SignUpForm()),
                     SizedBox(height: defaultPadding / 2),
-                    SocalSignUp(),
                   ],
                 ),
               ),
@@ -50,7 +48,6 @@ class MobileSignupScreen extends StatelessWidget {
             Spacer(),
           ],
         ),
-        SocalSignUp(),
       ],
     );
   }
