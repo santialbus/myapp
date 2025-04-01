@@ -67,6 +67,7 @@ class _LoginFormState extends State<LoginForm> {
               setState(() {
                 _errorMessage = null;
               });
+
               try {
                 final response = await _apiClient.login(
                   ApiEndpoints.login(),
@@ -75,18 +76,21 @@ class _LoginFormState extends State<LoginForm> {
                     'password': _passwordController.text,
                   },
                 );
-                // Assuming successful login returns a token or user data
-                if (response.containsKey('token')) {
-                  // Navigate to the main screen on successful login
-                  GoRouter.of(context).goNamed('main');
+
+                print("Respuesta del servidor: $response");
+
+                // ✅ Verifica si la clave "access_token" existe
+                if (response.containsKey('access_token')) {
+                  print("¡Inicio de sesión exitoso! Token: ${response['access_token']}");
+                  GoRouter.of(context).goNamed('main');  // Navega a la pantalla principal
                 } else {
                   setState(() {
-                    _errorMessage = 'Unexpected response format';
+                    _errorMessage = 'Unexpected response format: $response';
                   });
                 }
               } catch (e) {
                 setState(() {
-                  _errorMessage = e.toString();
+                  _errorMessage = "Error: $e";
                 });
               }
             },
