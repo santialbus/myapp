@@ -75,45 +75,56 @@ class _MainScreenState extends State<MainScreen> {
                       )
                       : null,
               backgroundColor: Colors.lightBlue,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
+              flexibleSpace: Stack(
+                fit: StackFit.expand,
+                children: [
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                    child: Image.asset(
                       'assets/images/trains2.png',
                       fit: BoxFit.cover,
                     ),
-                    LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
-                        final opacity = ((constraints.maxHeight - kToolbarHeight) / (150.0 - kToolbarHeight)).clamp(0.0, 1.0);
-                        final bottomPadding = 16.0 * ((constraints.maxHeight - kToolbarHeight) / (150.0 - kToolbarHeight));
-                        final blurStrength = ((150.0 - constraints.maxHeight) / (150.0 - kToolbarHeight)) * 10;
-                        return ClipRect(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: blurStrength, sigmaY: blurStrength),
-                            child: Container(
-                              color: Colors.lightBlue.withOpacity(0.5), // Add a semi-transparent color overlay
-                              alignment: Alignment.bottomLeft,
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 16.0, bottom: bottomPadding),
-                                child: Opacity(
-                                  opacity: opacity,
-                                  child: const Text(
-                                    "Tu estación mas cercana: Alicante/Alacant",
-                                    style: TextStyle(
-                                      fontSize: 24.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
+                  ),
+                  LayoutBuilder(
+                    builder: (
+                      BuildContext context,
+                      BoxConstraints constraints,
+                    ) {
+                      final opacity = ((constraints.maxHeight -
+                                  kToolbarHeight) /
+                              (150.0 - kToolbarHeight))
+                          .clamp(0.0, 1.0);
+                      final bottomPadding =
+                          16.0 *
+                          ((constraints.maxHeight - kToolbarHeight) /
+                              (150.0 - kToolbarHeight));
+                      final blurStrength =
+                          ((150.0 - constraints.maxHeight) /
+                              (150.0 - kToolbarHeight)) *
+                          10;
+                      return Container(
+                        // color: Colors.lightBlue.withOpacity(0.5), // Remove the color overlay for now
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: 16.0,
+                            bottom: bottomPadding,
+                          ),
+                          child: Opacity(
+                            opacity: opacity,
+                            child: const Text(
+                              "Tu estación mas cercana: Alicante/Alacant",
+                              style: TextStyle(
+                                fontSize: 24.0,
+                                color: Colors.white,
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ];
