@@ -66,36 +66,38 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              title:
-                  innerBoxIsScrolled
-                      ? const Text(
-                        "Tu estación mas cercana: Alicante/Alacant",
-                        style: TextStyle(fontSize: 24.0, color: Colors.white),
-                      )
-                      : null,
+              // title: innerBoxIsScrolled ? const Text("Tu estación mas cercana: Alicante/Alacant", style: TextStyle(fontSize: 24.0, color: Colors.white),) : null,
               backgroundColor: Colors.lightBlue,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-                background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.lightBlue, Colors.blue],
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Tu estación mas cercana: Alicante/Alacant",
-                          style: TextStyle(fontSize: 24.0, color: Colors.white),
+              flexibleSpace: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  final opacity =
+                      (constraints.maxHeight - kToolbarHeight) /
+                      (150.0 - kToolbarHeight);
+                  final bottomPadding =
+                      16.0 *
+                      ((constraints.maxHeight - kToolbarHeight) /
+                          (150.0 - kToolbarHeight));
+                  return FlexibleSpaceBar(
+                    background: Container(
+                      color: Colors.lightBlue,
+                      alignment: Alignment.bottomLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            left: 16.0, bottom: bottomPadding),
+                        child: Opacity(
+                          opacity: opacity,
+                          child: const Text(
+                            "Tu estación mas cercana: Alicante/Alacant",
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ];
