@@ -61,7 +61,22 @@ class _MainScreenState extends State<MainScreen> {
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverAppBar(pinned: true, title: const Text("Alicante/Alacant")),
+            SliverAppBar(
+              pinned: true,
+              floating: false,
+              expandedHeight: 150.0,
+              collapsedHeight: kToolbarHeight,
+              title: const Text("Alicante/Alacant"),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  color: Colors.lightBlue,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    "Tu estación mas cercana: Alicante/Alacant",
+                  ),
+                ),
+              ),
+            ),
           ];
         },
         body: ListView(
