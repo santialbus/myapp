@@ -58,17 +58,17 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Trip Information"),
-        backgroundColor: Colors.blue,
-        leading: IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () {
-            // TODO: Add profile button functionality
-          },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100.0), // Adjust height as needed
+        child: Container(
+          color: Colors.lightBlue,
+          alignment: Alignment.center,
+          child: const Text("Tu estación mas cercana: Alicante/Alacant"),
         ),
       ),
-      body:
+      body: ListView(
+        children: [
+          // Your existing content (trip cards) here
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : error != null
@@ -76,12 +76,51 @@ class _MainScreenState extends State<MainScreen> {
               : trips.isEmpty
               ? const Center(child: Text("No trips found."))
               : ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: trips.length,
                 itemBuilder: (context, index) {
                   final trip = trips[index];
                   return TripCard(trip: trip);
                 },
               ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround, // Keep this
+          children: [
+            Expanded(
+              child:
+                  isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : error != null
+                      ? Center(child: Text("Error: $error"))
+                      : trips.isEmpty
+                      ? const Center(child: Text("No trips found."))
+                      : ListView.builder(
+                        itemCount: trips.length,
+                        itemBuilder: (context, index) {
+                          final trip = trips[index];
+                          return TripCard(trip: trip);
+                        },
+                      ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
