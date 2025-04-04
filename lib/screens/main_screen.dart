@@ -74,7 +74,11 @@ class _MainScreenState extends State<MainScreen> {
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
                 background: Container(
-                  color: Colors.lightBlue,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.lightBlue, Colors.blue],
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
