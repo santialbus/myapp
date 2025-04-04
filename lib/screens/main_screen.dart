@@ -72,8 +72,12 @@ class _MainScreenState extends State<MainScreen> {
                 background: Container(
                   color: Colors.lightBlue,
                   alignment: Alignment.center,
-                  child: const Text( 
+                  child: const Text(
                     "Tu estación mas cercana: Alicante/Alacant",
+                    style: TextStyle(
+                      fontSize: 24.0, // Adjust the font size as needed
+                      color: Colors.white,
+                    ),
                    ),
                 ),
               ),
