@@ -66,19 +66,28 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              title: innerBoxIsScrolled ? const Text("Tu estación mas cercana: Alicante/Alacant") : null,
-              backgroundColor: Colors.lightBlue, // Add this line to set the background color
+              title:
+                  innerBoxIsScrolled
+                      ? const Text("Tu estación mas cercana: Alicante/Alacant")
+                      : null,
+              backgroundColor: Colors.lightBlue,
               flexibleSpace: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
                 background: Container(
                   color: Colors.lightBlue,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    "Tu estación mas cercana: Alicante/Alacant",
-                    style: TextStyle(
-                      fontSize: 24.0, // Adjust the font size as needed
-                      color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Tu estación mas cercana: Alicante/Alacant",
+                          style: TextStyle(fontSize: 24.0, color: Colors.white),
+                        ),
+                      ],
                     ),
-                   ),
+                  ),
                 ),
               ),
             ),
