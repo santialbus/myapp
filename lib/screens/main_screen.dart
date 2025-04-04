@@ -74,7 +74,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             SliverAppBar(
               pinned: true,
-              title: const Text("Tu estación mas cercana: Alicante/Alacant"),
+              title: const Text("Alicante/Alacant"),
             ),
           ];
         },
