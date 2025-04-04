@@ -58,7 +58,16 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Main Screen")),
+      appBar: AppBar(
+        title: const Text("Trip Information"),
+        backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: const Icon(Icons.account_circle),
+          onPressed: () {
+            // TODO: Add profile button functionality
+          },
+        ),
+      ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
