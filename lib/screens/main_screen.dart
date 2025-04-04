@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:myapp/models/trip_schema.dart';
 import 'package:myapp/api/api_client.dart';
@@ -74,28 +75,56 @@ class _MainScreenState extends State<MainScreen> {
                       )
                       : null,
               backgroundColor: Colors.lightBlue,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-                background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.lightBlue, Colors.blue],
+              flexibleSpace: Stack(
+                fit: StackFit.expand,
+                children: [
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                    child: Image.asset(
+                      'assets/images/trains2.png',
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Tu estación mas cercana: Alicante/Alacant",
-                          style: TextStyle(fontSize: 24.0, color: Colors.white),
+                  LayoutBuilder(
+                    builder: (
+                      BuildContext context,
+                      BoxConstraints constraints,
+                    ) {
+                      final opacity = ((constraints.maxHeight -
+                                  kToolbarHeight) /
+                              (150.0 - kToolbarHeight))
+                          .clamp(0.0, 1.0);
+                      final bottomPadding =
+                          16.0 *
+                          ((constraints.maxHeight - kToolbarHeight) /
+                              (150.0 - kToolbarHeight));
+                      final blurStrength =
+                          ((150.0 - constraints.maxHeight) /
+                              (150.0 - kToolbarHeight)) *
+                          10;
+                      return Container(
+                        // color: Colors.lightBlue.withOpacity(0.5), // Remove the color overlay for now
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: 16.0,
+                            bottom: bottomPadding,
+                          ),
+                          child: Opacity(
+                            opacity: opacity,
+                            child: const Text(
+                              "Tu estación mas cercana: Alicante/Alacant",
+                              style: TextStyle(
+                                fontSize: 24.0,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
+                ],
               ),
             ),
           ];
