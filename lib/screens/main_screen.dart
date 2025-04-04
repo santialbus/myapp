@@ -1,69 +1,121 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:myapp/models/trip_schema.dart';
+import 'package:myapp/api/api_client.dart';
 
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key}) : super(key: key);
 
-  // Dummy data for TripSchema
-  List<TripSchema> get trips => [
-        TripSchema(
-          tripId: "1",
-          serviceId: "svc1",
-          firstStopName: "Station A",
-          lastStopName: "Station B",
-          firstDepartureTime: "08:00",
-          lastArrivalTime: "09:00",
-          routeShortName: "R1",
-        ),
-        TripSchema(
-          tripId: "2",
-          serviceId: "svc2",
-          firstStopName: "Station C",
-          lastStopName: "Station D",
-          firstDepartureTime: "10:00",
-          lastArrivalTime: "11:30",
-          routeShortName: "R2",
-        ),
-      ];
+  @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  final ApiClient apiClient = ApiClient();
+  List<TripSchema> trips = [];
+  bool isLoading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTrips();
+  }
+
+  Future<void> fetchTrips() async {
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    try {
+      final response = await apiClient.get(
+        '/trips/getLocalTrips',
+        queryParameters: {'date': '20250401'},
+      );
+
+      if (response != null) {
+        final List<dynamic> data = response;
+        setState(() {
+          trips = data.map((json) => TripSchema.fromJson(json)).toList();
+        });
+      } else {
+        setState(() {
+          error = "Failed to fetch trips: Response is null";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = "Failed to fetch trips: ${e.toString()}";
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Main Screen")),
-      body: trips.isEmpty
-          ? const Center(child: Text("No trips found."))
-          : ListView.builder(
-              itemCount: trips.length,
-              itemBuilder: (context, index) {
-                final trip = trips[index];
-                return TripCard(trip: trip);
-              },
-            ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : error != null
+              ? Center(child: Text("Error: $error"))
+              : trips.isEmpty
+              ? const Center(child: Text("No trips found."))
+              : ListView.builder(
+                itemCount: trips.length,
+                itemBuilder: (context, index) {
+                  final trip = trips[index];
+                  return TripCard(trip: trip);
+                },
+              ),
     );
   }
 }
 
 class TripCard extends StatelessWidget {
   final TripSchema trip;
-
-  const TripCard({super.key, required this.trip});
+  const TripCard({Key? key, required this.trip}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Route: ${trip.routeShortName}",
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8.0),
-            Text("First Stop: ${trip.firstStopName ?? "N/A"}"),
-            Text("Last Stop: ${trip.lastStopName ?? "N/A"}"),
-            Text("Departure: ${trip.firstDepartureTime ?? "N/A"}"),
-            Text("Arrival: ${trip.lastArrivalTime ?? "N/A"}"),
+          children: <Widget>[
+            Text(
+              'Trip ID: ${trip.tripId}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text('Service ID: ${trip.serviceId}'),
+            Text('Route: ${trip.routeShortName}'),
+            const Divider(),
+            const Text(
+              "First Stop",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('Name: ${trip.firstStopName ?? "N/A"}'),
+            Text('Sequence: ${trip.firstStopSequence ?? "N/A"}'),
+            Text('Arrival: ${trip.firstArrivalTime ?? "N/A"}'),
+            Text('Departure: ${trip.firstDepartureTime ?? "N/A"}'),
+            const Divider(),
+            const Text(
+              "Last Stop",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('Name: ${trip.lastStopName ?? "N/A"}'),
+            Text('Sequence: ${trip.lastStopSequence ?? "N/A"}'),
+            Text('Arrival: ${trip.lastArrivalTime ?? "N/A"}'),
+            Text('Departure: ${trip.lastDepartureTime ?? "N/A"}'),
           ],
         ),
       ),
