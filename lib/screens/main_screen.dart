@@ -68,7 +68,10 @@ class _MainScreenState extends State<MainScreen> {
               collapsedHeight: kToolbarHeight,
               title:
                   innerBoxIsScrolled
-                      ? const Text("Tu estación mas cercana: Alicante/Alacant")
+                      ? const Text(
+                        "Tu estación mas cercana: Alicante/Alacant",
+                        style: TextStyle(fontSize: 24.0, color: Colors.white),
+                      )
                       : null,
               backgroundColor: Colors.lightBlue,
               flexibleSpace: FlexibleSpaceBar(
