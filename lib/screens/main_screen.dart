@@ -61,21 +61,7 @@ class _MainScreenState extends State<MainScreen> {
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverAppBar(
-              expandedHeight: 150.0, // Match the custom AppBar's height
-              floating: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  color: Colors.lightBlue,
-                  alignment: Alignment.center,
-                  child: const Text("Tu estación mas cercana: Alicante/Alacant"),
-                ),
-              ),
-            ),
-            SliverAppBar(
-              pinned: true,
-              title: const Text("Alicante/Alacant"),
-            ),
+            SliverAppBar(pinned: true, title: const Text("Alicante/Alacant")),
           ];
         },
         body: ListView(
@@ -83,28 +69,38 @@ class _MainScreenState extends State<MainScreen> {
             isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : error != null
-                    ? Center(child: Text("Error: $error"))
-                    : trips.isEmpty
-                        ? const Center(child: Text("No trips found."))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: trips.length,
-                            itemBuilder: (context, index) {
-                              final trip = trips[index];
-                              return TripCard(trip: trip);
-                            },
-                          ),
+                ? Center(child: Text("Error: $error"))
+                : trips.isEmpty
+                ? const Center(child: Text("No trips found."))
+                : ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: trips.length,
+                  itemBuilder: (context, index) {
+                    final trip = trips[index];
+                    return TripCard(trip: trip);
+                  },
+                ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar( // Corrected bottomNavigationBar
+      bottomNavigationBar: BottomAppBar(
+        // Corrected bottomNavigationBar
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(icon: const Icon(Icons.account_circle), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.account_circle), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.account_circle), onPressed: () {}),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {},
+            ),
           ],
         ),
       ),
