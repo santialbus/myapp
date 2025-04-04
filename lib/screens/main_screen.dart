@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (BuildContext context, BoxConstraints constraints) {
                   final opacity =
                       (constraints.maxHeight - kToolbarHeight) /
-                      (150.0 - kToolbarHeight).clamp(0.0, 1.0);
+                      (150.0 - kToolbarHeight);
                   final bottomPadding =
                       16.0 *
                       ((constraints.maxHeight - kToolbarHeight) /
@@ -83,7 +83,9 @@ class _MainScreenState extends State<MainScreen> {
                       alignment: Alignment.bottomLeft,
                       child: Padding(
                         padding: EdgeInsets.only(
-                            left: 16.0, bottom: bottomPadding),
+                          left: 16.0,
+                          bottom: bottomPadding,
+                        ),
                         child: Opacity(
                           opacity: opacity,
                           child: const Text(
