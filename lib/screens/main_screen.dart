@@ -66,14 +66,15 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              title: const Text("Alicante/Alacant"),
+              title: innerBoxIsScrolled ? const Text("Tu estación mas cercana: Alicante/Alacant") : null,
+              backgroundColor: Colors.lightBlue, // Add this line to set the background color
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   color: Colors.lightBlue,
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: const Text( 
                     "Tu estación mas cercana: Alicante/Alacant",
-                  ),
+                   ),
                 ),
               ),
             ),
