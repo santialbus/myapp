@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (BuildContext context, BoxConstraints constraints) {
                   final opacity =
                       (constraints.maxHeight - kToolbarHeight) /
-                      (150.0 - kToolbarHeight);
+                      (150.0 - kToolbarHeight).clamp(0.0, 1.0);
                   final bottomPadding =
                       16.0 *
                       ((constraints.maxHeight - kToolbarHeight) /
