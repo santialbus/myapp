@@ -26,17 +26,27 @@ class CustomAppBar extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
+                // Fondo con la imagen
                 Image.asset(
                   'assets/images/tren22.png',
                   fit: BoxFit.cover,
                 ),
+                // Aplicar el filtro de desenfoque cuando no esté expandido
                 if (!isExpanded)
                   BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                     child: Container(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Color.fromRGBO(0, 0, 0, 0.2), // Opacidad usando Color.fromRGBO
                     ),
                   ),
+                // Añadir una capa de color con opacidad a la imagen para darle un efecto
+                ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.2),
+                    BlendMode.darken,
+                  ),
+                  child: Container(),
+                ),
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
