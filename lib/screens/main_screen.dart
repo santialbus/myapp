@@ -67,7 +67,6 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              backgroundColor: Colors.lightBlue,
               flexibleSpace: Stack(
                 fit: StackFit.expand,
                 children: [
