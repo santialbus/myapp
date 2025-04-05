@@ -100,37 +100,33 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ];
         },
-        body: Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+        body: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+          child: Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-            child: ListView(
-              children: [
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : error != null
-                        ? Center(child: Text("Error: $error"))
-                        : trips.isEmpty
-                            ? const Center(child: Text("No trips found."))
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: trips.length,
-                                itemBuilder: (context, index) {
-                                  final trip = trips[index];
-                                  return TripCard(trip: trip);
-                                },
-                              ),
-              ],
-            ),
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : error != null
+                    ? Center(child: Text("Error: $error"))
+                    : trips.isEmpty
+                        ? const Center(child: Text("No trips found."))
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: trips.length,
+                            itemBuilder: (context, index) {
+                              final trip = trips[index];
+                              return TripCard(trip: trip);
+                            },
+                          ),
           ),
         ),
       ),
