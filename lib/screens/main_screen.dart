@@ -70,8 +70,8 @@ class _MainScreenState extends State<MainScreen> {
               title:
                   innerBoxIsScrolled
                       ? const Text(
-                        "Tu estación mas cercana: Alicante/Alacant",
-                        style: TextStyle(fontSize: 24.0, color: Colors.white),
+                        "Alicante/Alacant",
+                        style: TextStyle(fontSize: 20.0),
                       )
                       : null,
               backgroundColor: Colors.lightBlue,
@@ -90,34 +90,22 @@ class _MainScreenState extends State<MainScreen> {
                       BuildContext context,
                       BoxConstraints constraints,
                     ) {
-                      final opacity = ((constraints.maxHeight -
-                                  kToolbarHeight) /
-                              (150.0 - kToolbarHeight))
-                          .clamp(0.0, 1.0);
-                      final bottomPadding =
-                          16.0 *
-                          ((constraints.maxHeight - kToolbarHeight) /
-                              (150.0 - kToolbarHeight));
-                      final blurStrength =
-                          ((150.0 - constraints.maxHeight) /
-                              (150.0 - kToolbarHeight)) *
-                          10;
+                      final expanded = constraints.maxHeight > kToolbarHeight;
                       return Container(
-                        // color: Colors.lightBlue.withOpacity(0.5), // Remove the color overlay for now
                         alignment: Alignment.bottomLeft,
                         child: Padding(
                           padding: EdgeInsets.only(
                             left: 16.0,
-                            bottom: bottomPadding,
+                            bottom: expanded ? 16.0 : 0.0,
                           ),
-                          child: Opacity(
-                            opacity: opacity,
-                            child: const Text(
-                              "Tu estación mas cercana: Alicante/Alacant",
-                              style: TextStyle(
-                                fontSize: 24.0,
-                                color: Colors.white,
-                              ),
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 300),
+                            opacity: expanded ? 1.0 : 0.0,
+                            child: Text(
+                              expanded
+                                  ? "Tu estación mas cercana: Alicante/Alacant"
+                                  : "",
+                              style: const TextStyle(fontSize: 20.0),
                             ),
                           ),
                         ),
