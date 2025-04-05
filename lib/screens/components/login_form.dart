@@ -63,7 +63,13 @@ class _LoginFormState extends State<LoginForm> {
             ),
           const SizedBox(height: defaultPadding),
           ElevatedButton(
+
+
             onPressed: () async {
+
+              //de momento
+              GoRouter.of(context).goNamed('main');
+
               setState(() {
                 _errorMessage = null;
               });
@@ -79,10 +85,9 @@ class _LoginFormState extends State<LoginForm> {
 
                 print("Respuesta del servidor: $response");
 
-                // ✅ Verifica si la clave "access_token" existe
                 if (response.containsKey('access_token')) {
                   print("¡Inicio de sesión exitoso! Token: ${response['access_token']}");
-                  GoRouter.of(context).goNamed('main');  // Navega a la pantalla principal
+                  GoRouter.of(context).goNamed('main');
                 } else {
                   setState(() {
                     _errorMessage = 'Unexpected response format: $response';

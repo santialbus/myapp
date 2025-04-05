@@ -59,68 +59,114 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              expandedHeight: 150.0,
-              collapsedHeight: kToolbarHeight,
-              backgroundColor: Colors.lightBlue,
-              flexibleSpace: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  final expanded = constraints.maxHeight > kToolbarHeight;
-                  return Container(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        bottom: expanded ? 16.0 : 0.0,
-                        right: 16.0,
-                      ),
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 300),
-                        opacity: expanded ? 1.0 : 0.0,
-                        child: Text(
-                          expanded
-                              ? "Tu estación mas cercana: Alicante/Alacant"
-                              : "",
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: 150.0,
+                  collapsedHeight: kToolbarHeight,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      final isExpanded = constraints.maxHeight > kToolbarHeight;
+
+                      return ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
                         ),
-                      ),
-                    ),
-                  );
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // 🖼 Fondo con imagen
+                            Image.asset(
+                              'assets/images/tren22.png',
+                              fit: BoxFit.cover,
+                            ),
+
+                            if (!isExpanded)
+                              BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                child: Container(
+                                  color: Colors.black.withOpacity(0.2),
+                                ),
+                              ),
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  left: 16.0,
+                                  bottom: isExpanded ? 16.0 : 8.0,
+                                  right: 16.0,
+                                ),
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 300),
+                                  opacity: isExpanded ? 1.0 : 0.0,
+                                  child: const Text(
+                                    "Tu estación más cercana: Alicante/Alacant",
+                                    style: TextStyle(
+                                      fontSize: 20.0,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black45,
+                                          blurRadius: 4,
+                                          offset: Offset(1, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                )
+              ];
+            },
+            body: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : error != null
+                  ? Center(child: Text("Error: $error"))
+                  : trips.isEmpty
+                  ? const Center(child: Text("No trips found."))
+                  : ListView.builder(
+                padding: const EdgeInsets.only(top: 16),
+                itemCount: trips.length,
+                itemBuilder: (context, index) {
+                  final trip = trips[index];
+                  return TripCard(trip: trip);
                 },
               ),
             ),
-          ];
-        },
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : error != null
-                ? Center(child: Text("Error: $error"))
-                : trips.isEmpty
-                    ? const Center(child: Text("No trips found."))
-                    : ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: trips.length,
-                          itemBuilder: (context, index) {
-                            final trip = trips[index];
-                            return TripCard(trip: trip);
-                          },
-                        ),
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
