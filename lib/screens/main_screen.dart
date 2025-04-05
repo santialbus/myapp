@@ -67,13 +67,6 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              title:
-                  innerBoxIsScrolled
-                      ? const Text(
-                        "Alicante/Alacant",
-                        style: TextStyle(fontSize: 20.0),
-                      )
-                      : null,
               backgroundColor: Colors.lightBlue,
               flexibleSpace: Stack(
                 fit: StackFit.expand,
@@ -105,7 +98,11 @@ class _MainScreenState extends State<MainScreen> {
                               expanded
                                   ? "Tu estación mas cercana: Alicante/Alacant"
                                   : "",
-                              style: const TextStyle(fontSize: 20.0),
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
