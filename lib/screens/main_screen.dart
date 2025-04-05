@@ -67,64 +67,46 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-                backgroundColor: Colors.transparent,
-              flexibleSpace: FlexibleSpaceBar(
-                // Changed flexibleSpace to FlexibleSpaceBar
-                title:
-                    innerBoxIsScrolled
-                        ? Text(
-                          "Tu estación mas cercana: Alicante/Alacant",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+              title:
+                  innerBoxIsScrolled
+                      ? const Text(
+                        "Tu estación mas cercana: Alicante/Alacant",
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                      : null,
+              backgroundColor: Colors.lightBlue,
+              flexibleSpace: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  final expanded = constraints.maxHeight > kToolbarHeight;
+                  return Container(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 16.0,
+                        bottom: expanded ? 16.0 : 0.0,
+                        right: 16.0,
+                      ),
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: expanded ? 1.0 : 0.0,
+                        child: Text(
+                          expanded
+                              ? "Tu estación mas cercana: Alicante/Alacant"
+                              : "",
+                          style: const TextStyle(
+                            fontSize: 20.0,
                             color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )
-                        : null,
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                      child: Image.asset(
-                        'assets/images/trains2.png',
-                        fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                    LayoutBuilder(
-                      builder: (
-                        BuildContext context,
-                        BoxConstraints constraints,
-                      ) {
-                        final top = constraints.biggest.height - kToolbarHeight;
-                        final progress = top / (150 - kToolbarHeight);
-                        final opacity = progress;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 16, bottom: 16),
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: FadeTransition(
-                              opacity: AlwaysStoppedAnimation(opacity),
-                              child: DefaultTextStyle(
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                ),
-                                child:
-                                    progress > 0.5
-                                        ? const Text(
-                                          "Tu estación mas cercana: Alicante/Alacant",
-                                        )
-                                        : const SizedBox(),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ];
