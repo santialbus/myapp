@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
               floating: false,
               expandedHeight: 150.0,
               collapsedHeight: kToolbarHeight,
-              backgroundColor: Colors.transparent,
+                backgroundColor: Colors.transparent,
               flexibleSpace: FlexibleSpaceBar(
                 // Changed flexibleSpace to FlexibleSpaceBar
                 title:
