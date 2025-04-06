@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:myapp/models/trip_schema.dart';
 import 'package:myapp/api/api_client.dart';
 import 'package:myapp/widgets/custom_app_bar.dart';
 import 'package:myapp/widgets/trip_card.dart';
-
 import '../widgets/custom_bottom_app_bar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -19,11 +19,26 @@ class _MainScreenState extends State<MainScreen> {
   List<TripSchema> trips = [];
   bool isLoading = true;
   String? error;
+  bool showFilters = false;
+  bool showOverlay = false; // Controla si el overlay se muestra
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     fetchTrips();
+
+    // Ocultar filtros cuando se hace scroll hacia abajo
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+        if (showFilters) {
+          setState(() {
+            showFilters = false;
+            showOverlay = false; // Ocultar el overlay también
+          });
+        }
+      }
+    });
   }
 
   Future<void> fetchTrips() async {
@@ -50,7 +65,6 @@ class _MainScreenState extends State<MainScreen> {
       }
     } catch (e) {
       setState(() {
-        // Display a mocked trip data when the API call fails
         trips = [
           TripSchema(
             tripId: "mocked_trip",
@@ -66,8 +80,6 @@ class _MainScreenState extends State<MainScreen> {
             routeShortName: "MOCK",
           ),
         ];
-
-        //error = "Failed to fetch trips: ${e.toString()}";
       });
     } finally {
       setState(() {
@@ -81,12 +93,71 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // Overlay semitransparente cuando se presiona "Buscar"
+          if (showOverlay)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showOverlay = false;
+                  showFilters = false;
+                });
+              },
+              child: Container(
+                color: Colors.black.withOpacity(0.5), // Este es el overlay oscuro
+              ),
+            ),
           NestedScrollView(
-            headerSliverBuilder: (
-              BuildContext context,
-              bool innerBoxIsScrolled,
-            ) {
-              return <Widget>[CustomAppBar()];
+            controller: _scrollController,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return [
+                CustomAppBar(
+                  onExpandFilters: () {
+                    setState(() {
+                      showFilters = !showFilters;
+                      if (showFilters) {
+                        showOverlay = true; // Mostrar overlay cuando los filtros se muestran
+                      } else {
+                        showOverlay = false; // Ocultar overlay si se cierran los filtros
+                      }
+                    });
+                  },
+                ),
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Si el usuario hace clic fuera de los filtros, se cierran.
+                      if (showFilters) {
+                        setState(() {
+                          showFilters = false;
+                          showOverlay = false; // Ocultar overlay
+                        });
+                      }
+                    },
+                    child: AnimatedCrossFade(
+                      firstChild: const SizedBox.shrink(), // No muestra nada
+                      secondChild: GestureDetector(
+                        onTap: () {}, // Evitar que se cierre al tocar los filtros
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: SearchFiltersPanel(
+                            onSearchPressed: () {
+                              // Ocultamos los filtros y el overlay al presionar "Buscar"
+                              setState(() {
+                                showFilters = false;
+                                showOverlay = false;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      crossFadeState: showFilters
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 300),
+                    ),
+                  ),
+                ),
+              ];
             },
             body: Container(
               decoration: BoxDecoration(
@@ -103,26 +174,93 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               ),
-              child:
-                  isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : error != null
-                      ? Center(child: Text("Error: $error"))
-                      : trips.isEmpty
-                      ? const Center(child: Text("No trips found."))
-                      : ListView.builder(
-                        padding: const EdgeInsets.only(top: 16),
-                        itemCount: trips.length,
-                        itemBuilder: (context, index) {
-                          final trip = trips[index];
-                          return TripCard(trip: trip);
-                        },
-                      ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : error != null
+                  ? Center(child: Text("Error: $error"))
+                  : trips.isEmpty
+                  ? const Center(child: Text("No trips found."))
+                  : ListView.builder(
+                padding: const EdgeInsets.only(top: 16),
+                itemCount: trips.length,
+                itemBuilder: (context, index) {
+                  final trip = trips[index];
+                  return TripCard(trip: trip);
+                },
+              ),
             ),
           ),
         ],
       ),
       bottomNavigationBar: const CustomBottomAppBar(),
+    );
+  }
+}
+
+class SearchFiltersPanel extends StatelessWidget {
+  final VoidCallback onSearchPressed;
+
+  const SearchFiltersPanel({super.key, required this.onSearchPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey[100],
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Text(
+            "Modifica tu búsqueda",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _buildSearchItem(Icons.location_on, "Destino", "Ej: Madrid"),
+          const SizedBox(height: 12),
+          _buildSearchItem(Icons.train, "Tipo de tren", "AVE, MD, etc."),
+          const SizedBox(height: 12),
+          _buildSearchItem(Icons.access_time, "Horario", "Mañana, Tarde, Noche"),
+          const SizedBox(height: 16),
+          // Botón de buscar con ancho expandido
+          SizedBox(
+            width: double.infinity,  // Esto hace que el botón ocupe todo el ancho disponible
+            child: ElevatedButton(
+              onPressed: onSearchPressed, // Al presionar se ocultan los filtros
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text("Buscar", style: TextStyle(fontSize: 16)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchItem(IconData icon, String title, String hint) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.black54),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.black45)),
+              Text(hint, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
