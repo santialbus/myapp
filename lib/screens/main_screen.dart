@@ -50,7 +50,24 @@ class _MainScreenState extends State<MainScreen> {
       }
     } catch (e) {
       setState(() {
-        error = "Failed to fetch trips: ${e.toString()}";
+        // Display a mocked trip data when the API call fails
+        trips = [
+          TripSchema(
+            tripId: "mocked_trip",
+            serviceId: "mocked_service",
+            firstStopName: "Mocked Start",
+            firstStopSequence: 1,
+            firstArrivalTime: "08:00",
+            firstDepartureTime: "08:05",
+            lastStopName: "Mocked End",
+            lastStopSequence: 5,
+            lastArrivalTime: "09:00",
+            lastDepartureTime: "09:05",
+            routeShortName: "MOCK",
+          ),
+        ];
+
+        //error = "Failed to fetch trips: ${e.toString()}";
       });
     } finally {
       setState(() {
@@ -65,10 +82,11 @@ class _MainScreenState extends State<MainScreen> {
       body: Stack(
         children: [
           NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                CustomAppBar(),
-              ];
+            headerSliverBuilder: (
+              BuildContext context,
+              bool innerBoxIsScrolled,
+            ) {
+              return <Widget>[CustomAppBar()];
             },
             body: Container(
               decoration: BoxDecoration(
@@ -85,20 +103,21 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               ),
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : error != null
-                  ? Center(child: Text("Error: $error"))
-                  : trips.isEmpty
-                  ? const Center(child: Text("No trips found."))
-                  : ListView.builder(
-                padding: const EdgeInsets.only(top: 16),
-                itemCount: trips.length,
-                itemBuilder: (context, index) {
-                  final trip = trips[index];
-                  return TripCard(trip: trip);
-                },
-              ),
+              child:
+                  isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : error != null
+                      ? Center(child: Text("Error: $error"))
+                      : trips.isEmpty
+                      ? const Center(child: Text("No trips found."))
+                      : ListView.builder(
+                        padding: const EdgeInsets.only(top: 16),
+                        itemCount: trips.length,
+                        itemBuilder: (context, index) {
+                          final trip = trips[index];
+                          return TripCard(trip: trip);
+                        },
+                      ),
             ),
           ),
         ],
