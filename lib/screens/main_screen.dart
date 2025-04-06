@@ -20,7 +20,6 @@ class _MainScreenState extends State<MainScreen> {
   bool isLoading = true;
   String? error;
   bool showFilters = false;
-  bool showOverlay = false; // Controla si el overlay se muestra
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -34,7 +33,6 @@ class _MainScreenState extends State<MainScreen> {
         if (showFilters) {
           setState(() {
             showFilters = false;
-            showOverlay = false; // Ocultar el overlay también
           });
         }
       }
@@ -93,19 +91,6 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Overlay semitransparente cuando se presiona "Buscar"
-          if (showOverlay)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  showOverlay = false;
-                  showFilters = false;
-                });
-              },
-              child: Container(
-                color: Colors.black.withOpacity(0.5), // Este es el overlay oscuro
-              ),
-            ),
           NestedScrollView(
             controller: _scrollController,
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -114,11 +99,6 @@ class _MainScreenState extends State<MainScreen> {
                   onExpandFilters: () {
                     setState(() {
                       showFilters = !showFilters;
-                      if (showFilters) {
-                        showOverlay = true; // Mostrar overlay cuando los filtros se muestran
-                      } else {
-                        showOverlay = false; // Ocultar overlay si se cierran los filtros
-                      }
                     });
                   },
                 ),
@@ -129,7 +109,6 @@ class _MainScreenState extends State<MainScreen> {
                       if (showFilters) {
                         setState(() {
                           showFilters = false;
-                          showOverlay = false; // Ocultar overlay
                         });
                       }
                     },
@@ -137,18 +116,12 @@ class _MainScreenState extends State<MainScreen> {
                       firstChild: const SizedBox.shrink(), // No muestra nada
                       secondChild: GestureDetector(
                         onTap: () {}, // Evitar que se cierre al tocar los filtros
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: SearchFiltersPanel(
-                            onSearchPressed: () {
-                              // Ocultamos los filtros y el overlay al presionar "Buscar"
-                              setState(() {
-                                showFilters = false;
-                                showOverlay = false;
-                              });
-                            },
-                          ),
-                        ),
+                        child: SearchFiltersPanel(onSearchPressed: () {
+                          // Ocultamos los filtros al presionar "Buscar"
+                          setState(() {
+                            showFilters = false;
+                          });
+                        }),
                       ),
                       crossFadeState: showFilters
                           ? CrossFadeState.showSecond
@@ -264,3 +237,4 @@ class SearchFiltersPanel extends StatelessWidget {
     );
   }
 }
+
