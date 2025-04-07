@@ -10,6 +10,7 @@ import '../widgets/custom_bottom_app_bar.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -21,13 +22,13 @@ class _MainScreenState extends State<MainScreen> {
   String? error;
   bool showFilters = false;
   final ScrollController _scrollController = ScrollController();
+  final double searchBarBottom = kToolbarHeight + 60 + 12;
 
   @override
   void initState() {
     super.initState();
     fetchTrips();
 
-    // Ocultar filtros cuando se hace scroll hacia abajo
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (showFilters) {
@@ -102,34 +103,6 @@ class _MainScreenState extends State<MainScreen> {
                     });
                   },
                 ),
-                SliverToBoxAdapter(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Si el usuario hace clic fuera de los filtros, se cierran.
-                      if (showFilters) {
-                        setState(() {
-                          showFilters = false;
-                        });
-                      }
-                    },
-                    child: AnimatedCrossFade(
-                      firstChild: const SizedBox.shrink(), // No muestra nada
-                      secondChild: GestureDetector(
-                        onTap: () {}, // Evitar que se cierre al tocar los filtros
-                        child: SearchFiltersPanel(onSearchPressed: () {
-                          // Ocultamos los filtros al presionar "Buscar"
-                          setState(() {
-                            showFilters = false;
-                          });
-                        }),
-                      ),
-                      crossFadeState: showFilters
-                          ? CrossFadeState.showSecond
-                          : CrossFadeState.showFirst,
-                      duration: const Duration(milliseconds: 300),
-                    ),
-                  ),
-                ),
               ];
             },
             body: Container(
@@ -160,6 +133,37 @@ class _MainScreenState extends State<MainScreen> {
                   final trip = trips[index];
                   return TripCard(trip: trip);
                 },
+              ),
+            ),
+          ),
+
+          /// FILTROS FIJOS SOBRE EL CONTENIDO
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            top: showFilters ? searchBarBottom : -300,
+            left: 0,
+            right: 0,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: showFilters ? 1.0 : 0.0,
+              child: Transform.scale(
+                scale: showFilters ? 1.0 : 0.95,
+                alignment: Alignment.topCenter,
+                child: Material(
+                  elevation: 12,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                  child: SearchFiltersPanel(
+                    onSearchPressed: () {
+                      setState(() {
+                        showFilters = false;
+                      });
+                    },
+                  ),
+                ),
               ),
             ),
           ),

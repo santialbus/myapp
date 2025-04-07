@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -11,59 +10,32 @@ class CustomAppBar extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       floating: false,
-      expandedHeight: 150.0,
-      collapsedHeight: kToolbarHeight,
+      expandedHeight: kToolbarHeight + 20, // Un poquito más alto si quieres
+      collapsedHeight: kToolbarHeight + 20,
       backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
-      flexibleSpace: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final isExpanded = constraints.maxHeight > kToolbarHeight;
-
-          return ClipRRect(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
+      flexibleSpace: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset('assets/images/tren22.png', fit: BoxFit.cover),
+            Container(
+              color: Colors.black.withOpacity(0.2),
             ),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset('assets/images/tren22.png', fit: BoxFit.cover),
-                if (!isExpanded)
-                  BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                    child: Container(
-                      color: const Color.fromRGBO(0, 0, 0, 0.2),
-                    ),
-                  ),
-                ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.2),
-                    BlendMode.darken,
-                  ),
-                  child: Container(),
-                ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 16.0,
-                      bottom: isExpanded ? 16.0 : 8.0,
-                      right: 16.0,
-                    ),
-                    child: isExpanded
-                        ? SearchBarWidget(onExpandFilters: onExpandFilters)
-                        : AnimatedOpacity(
-                      duration: const Duration(milliseconds: 300),
-                      opacity: 0.0,
-                      child: Container(),
-                    ),
-                  ),
-                ),
-              ],
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: SearchBarWidget(onExpandFilters: onExpandFilters),
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
