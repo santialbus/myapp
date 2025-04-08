@@ -25,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   final ScrollController _scrollController = ScrollController();
   final double searchBarBottom = kToolbarHeight + 60 + 12;
   String? selectedDestination;
+  String? selectedTrain; // 🔥
 
   @override
   void initState() {
@@ -93,15 +94,21 @@ class _MainScreenState extends State<MainScreen> {
 
   void _applyFilters() {
     final destination = selectedDestination?.trim();
+    final train = selectedTrain?.trim(); // 🔥
+
     setState(() {
-      if (destination == null || destination.isEmpty) {
-        filteredTrips = List.from(trips); // fuerza reconstrucción
-      } else {
-        final selectedDestList = destination.split(',').map((e) => e.trim()).toList();
-        filteredTrips = trips.where((trip) {
-          return selectedDestList.contains(trip.lastStopName);
-        }).toList();
-      }
+      filteredTrips = trips.where((trip) {
+        final matchDestination = destination == null || destination.isEmpty
+            ? true
+            : destination.split(',').map((e) => e.trim()).contains(trip.lastStopName);
+
+        final matchTrain = train == null || train.isEmpty
+            ? true
+            : train.split(',').map((e) => e.trim()).contains(trip.routeShortName);
+
+        return matchDestination && matchTrain;
+      }).toList();
+
       showFilters = false;
     });
   }
@@ -181,9 +188,14 @@ class _MainScreenState extends State<MainScreen> {
                         selectedDestination = newDestination;
                       });
                     },
-                    selectedDestination: selectedDestination, // 👈 AÑADE ESTA LÍNEA
+                    onTrainChanged: (String? newTrain) {
+                      setState(() {
+                        selectedTrain = newTrain;
+                      });
+                    },
+                    selectedDestination: selectedDestination,
+                    selectedTrain: selectedTrain, // 🔥
                   ),
-
                 ),
               ),
             ),
@@ -200,21 +212,30 @@ class SearchFiltersPanel extends StatelessWidget {
   final VoidCallback onSearchPressed;
   final List<TripSchema> trips;
   final ValueChanged<String?> onDestinationChanged;
-  final String? selectedDestination; // 👈 NUEVA PROP
+  final ValueChanged<String?> onTrainChanged; // 🔥
+  final String? selectedDestination;
+  final String? selectedTrain; // 🔥
 
   const SearchFiltersPanel({
     super.key,
     required this.onSearchPressed,
     required this.trips,
     required this.onDestinationChanged,
-    required this.selectedDestination, // 👈 AGREGA AQUÍ TAMBIÉN
+    required this.onTrainChanged, // 🔥
+    required this.selectedDestination,
+    required this.selectedTrain, // 🔥
   });
-
 
   @override
   Widget build(BuildContext context) {
     List<String> destinations = trips
         .map((trip) => trip.lastStopName)
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    List<String> trains = trips
+        .map((trip) => trip.routeShortName)
         .whereType<String>()
         .toSet()
         .toList();
@@ -231,7 +252,7 @@ class SearchFiltersPanel extends StatelessWidget {
           const SizedBox(height: 12),
           _buildDestinationSelector(context, destinations),
           const SizedBox(height: 12),
-          _buildSearchItem(Icons.train, "Tipo de tren", "AVE, MD, etc."),
+          _buildTrainSelector(context, trains), // 🔥
           const SizedBox(height: 12),
           _buildSearchItem(Icons.access_time, "Horario", "Mañana, Tarde, Noche"),
           const SizedBox(height: 16),
@@ -255,6 +276,32 @@ class SearchFiltersPanel extends StatelessWidget {
   }
 
   Widget _buildDestinationSelector(BuildContext context, List<String> destinations) {
+    return _buildMultiSelect(
+      context,
+      label: "Selecciona uno o varios destinos",
+      values: destinations,
+      selectedValue: selectedDestination,
+      onChanged: onDestinationChanged,
+    );
+  }
+
+  Widget _buildTrainSelector(BuildContext context, List<String> trains) {
+    return _buildMultiSelect(
+      context,
+      label: "Selecciona uno o varios trenes",
+      values: trains,
+      selectedValue: selectedTrain,
+      onChanged: onTrainChanged,
+    );
+  }
+
+  Widget _buildMultiSelect(
+      BuildContext context, {
+        required String label,
+        required List<String> values,
+        required String? selectedValue,
+        required ValueChanged<String?> onChanged,
+      }) {
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -288,21 +335,21 @@ class SearchFiltersPanel extends StatelessWidget {
                               onChanged: (bool? value) {
                                 setModalState(() {
                                   selectAll = value ?? false;
-                                  selectedItems = selectAll ? List.from(destinations) : [];
+                                  selectedItems = selectAll ? List.from(values) : [];
                                 });
                               },
                             ),
                             const Divider(),
-                            ...destinations.map((destination) {
+                            ...values.map((val) {
                               return CheckboxListTile(
-                                title: Text(destination),
-                                value: selectedItems.contains(destination),
+                                title: Text(val),
+                                value: selectedItems.contains(val),
                                 onChanged: (bool? value) {
                                   setModalState(() {
                                     if (value == true) {
-                                      selectedItems.add(destination);
+                                      selectedItems.add(val);
                                     } else {
-                                      selectedItems.remove(destination);
+                                      selectedItems.remove(val);
                                       selectAll = false;
                                     }
                                   });
@@ -313,7 +360,7 @@ class SearchFiltersPanel extends StatelessWidget {
                             Center(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  onDestinationChanged(selectAll ? '' : selectedItems.join(','));
+                                  onChanged(selectAll ? '' : selectedItems.join(','));
                                   Navigator.pop(context);
                                 },
                                 child: const Text("Aplicar"),
@@ -342,9 +389,9 @@ class SearchFiltersPanel extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                (selectedDestination == null || selectedDestination!.trim().isEmpty)
-                    ? "Selecciona uno o varios destinos"
-                    : selectedDestination!,
+                (selectedValue == null || selectedValue.trim().isEmpty)
+                    ? label
+                    : selectedValue,
                 style: const TextStyle(fontWeight: FontWeight.w500),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -352,7 +399,6 @@ class SearchFiltersPanel extends StatelessWidget {
             const Icon(Icons.arrow_drop_down),
           ],
         ),
-
       ),
     );
   }
