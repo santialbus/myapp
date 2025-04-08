@@ -25,7 +25,8 @@ class _MainScreenState extends State<MainScreen> {
   final ScrollController _scrollController = ScrollController();
   final double searchBarBottom = kToolbarHeight + 60 + 12;
   String? selectedDestination;
-  String? selectedTrain; // 🔥
+  String? selectedTrain;
+  List<String> selectedPeriods = []; // 🕒 NUEVO
 
   @override
   void initState() {
@@ -68,22 +69,9 @@ class _MainScreenState extends State<MainScreen> {
       }
     } catch (e) {
       setState(() {
-        trips = [
-          TripSchema(
-            tripId: "mocked_trip",
-            serviceId: "mocked_service",
-            firstStopName: "Mocked Start",
-            firstStopSequence: 1,
-            firstArrivalTime: "08:00",
-            firstDepartureTime: "08:05",
-            lastStopName: "Mocked End",
-            lastStopSequence: 5,
-            lastArrivalTime: "09:00",
-            lastDepartureTime: "09:05",
-            routeShortName: "MOCK",
-          ),
-        ];
-        filteredTrips = trips;
+        trips = [];
+        filteredTrips = [];
+        error = e.toString();
       });
     } finally {
       setState(() {
@@ -94,7 +82,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _applyFilters() {
     final destination = selectedDestination?.trim();
-    final train = selectedTrain?.trim(); // 🔥
+    final train = selectedTrain?.trim();
 
     setState(() {
       filteredTrips = trips.where((trip) {
@@ -106,11 +94,34 @@ class _MainScreenState extends State<MainScreen> {
             ? true
             : train.split(',').map((e) => e.trim()).contains(trip.routeShortName);
 
-        return matchDestination && matchTrain;
+        final matchPeriod = selectedPeriods.isEmpty
+            ? true
+            : _matchesPeriod(trip.firstArrivalTime ?? '', selectedPeriods);
+
+        return matchDestination && matchTrain && matchPeriod;
       }).toList();
 
       showFilters = false;
     });
+  }
+
+  bool _matchesPeriod(String time, List<String> periods) {
+    final hour = int.tryParse(time.split(':')[0]) ?? 0;
+
+    for (var period in periods) {
+      switch (period) {
+        case 'Mañana':
+          if (hour >= 0 && hour <= 12) return true;
+          break;
+        case 'Tarde':
+          if (hour >= 13 && hour <= 20) return true;
+          break;
+        case 'Noche':
+          if (hour >= 21 && hour <= 23) return true;
+          break;
+      }
+    }
+    return false;
   }
 
   @override
@@ -183,18 +194,12 @@ class _MainScreenState extends State<MainScreen> {
                   child: SearchFiltersPanel(
                     trips: trips,
                     onSearchPressed: _applyFilters,
-                    onDestinationChanged: (String? newDestination) {
-                      setState(() {
-                        selectedDestination = newDestination;
-                      });
-                    },
-                    onTrainChanged: (String? newTrain) {
-                      setState(() {
-                        selectedTrain = newTrain;
-                      });
-                    },
+                    onDestinationChanged: (value) => setState(() => selectedDestination = value),
+                    onTrainChanged: (value) => setState(() => selectedTrain = value),
+                    onPeriodChanged: (value) => setState(() => selectedPeriods = value),
                     selectedDestination: selectedDestination,
-                    selectedTrain: selectedTrain, // 🔥
+                    selectedTrain: selectedTrain,
+                    selectedPeriods: selectedPeriods,
                   ),
                 ),
               ),
@@ -207,54 +212,46 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// ======================== FILTERS PANEL ========================
 class SearchFiltersPanel extends StatelessWidget {
   final VoidCallback onSearchPressed;
   final List<TripSchema> trips;
   final ValueChanged<String?> onDestinationChanged;
-  final ValueChanged<String?> onTrainChanged; // 🔥
+  final ValueChanged<String?> onTrainChanged;
+  final ValueChanged<List<String>> onPeriodChanged;
   final String? selectedDestination;
-  final String? selectedTrain; // 🔥
+  final String? selectedTrain;
+  final List<String> selectedPeriods;
 
   const SearchFiltersPanel({
     super.key,
     required this.onSearchPressed,
     required this.trips,
     required this.onDestinationChanged,
-    required this.onTrainChanged, // 🔥
+    required this.onTrainChanged,
+    required this.onPeriodChanged,
     required this.selectedDestination,
-    required this.selectedTrain, // 🔥
+    required this.selectedTrain,
+    required this.selectedPeriods,
   });
 
   @override
   Widget build(BuildContext context) {
-    List<String> destinations = trips
-        .map((trip) => trip.lastStopName)
-        .whereType<String>()
-        .toSet()
-        .toList();
-
-    List<String> trains = trips
-        .map((trip) => trip.routeShortName)
-        .whereType<String>()
-        .toSet()
-        .toList();
+    List<String> destinations = trips.map((trip) => trip.lastStopName).whereType<String>().toSet().toList();
+    List<String> trains = trips.map((trip) => trip.routeShortName).whereType<String>().toSet().toList();
+    List<String> periods = ['Mañana', 'Tarde', 'Noche'];
 
     return Container(
       color: Colors.grey[100],
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const Text(
-            "Modifica tu búsqueda",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text("Modifica tu búsqueda", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          _buildDestinationSelector(context, destinations),
+          _buildCheckboxSelector(context, "Selecciona uno o varios destinos", destinations, selectedDestination, onDestinationChanged),
           const SizedBox(height: 12),
-          _buildTrainSelector(context, trains), // 🔥
+          _buildCheckboxSelector(context, "Selecciona tipo de tren", trains, selectedTrain, onTrainChanged),
           const SizedBox(height: 12),
-          _buildSearchItem(Icons.access_time, "Horario", "Mañana, Tarde, Noche"),
+          _buildPeriodSelector(context, periods),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -263,9 +260,7 @@ class SearchFiltersPanel extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text("Buscar", style: TextStyle(fontSize: 16)),
             ),
@@ -275,50 +270,22 @@ class SearchFiltersPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildDestinationSelector(BuildContext context, List<String> destinations) {
-    return _buildMultiSelect(
-      context,
-      label: "Selecciona uno o varios destinos",
-      values: destinations,
-      selectedValue: selectedDestination,
-      onChanged: onDestinationChanged,
-    );
-  }
-
-  Widget _buildTrainSelector(BuildContext context, List<String> trains) {
-    return _buildMultiSelect(
-      context,
-      label: "Selecciona uno o varios trenes",
-      values: trains,
-      selectedValue: selectedTrain,
-      onChanged: onTrainChanged,
-    );
-  }
-
-  Widget _buildMultiSelect(
-      BuildContext context, {
-        required String label,
-        required List<String> values,
-        required String? selectedValue,
-        required ValueChanged<String?> onChanged,
-      }) {
+  Widget _buildCheckboxSelector(BuildContext context, String hint, List<String> items, String? selected, ValueChanged<String?> onChanged) {
     return GestureDetector(
       onTap: () {
+        List<String> selectedItems = selected?.split(',') ?? [];
+        bool selectAll = selectedItems.length == items.length;
+
         showModalBottomSheet(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
           isScrollControlled: true,
           builder: (BuildContext context) {
-            List<String> selectedItems = [];
-            bool selectAll = false;
-
             return StatefulBuilder(
               builder: (context, setModalState) {
                 return DraggableScrollableSheet(
                   expand: false,
-                  initialChildSize: 0.7,
+                  initialChildSize: 0.6,
                   maxChildSize: 0.95,
                   minChildSize: 0.4,
                   builder: (context, scrollController) {
@@ -327,35 +294,32 @@ class SearchFiltersPanel extends StatelessWidget {
                       child: SingleChildScrollView(
                         controller: scrollController,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CheckboxListTile(
                               title: const Text("Todos"),
                               value: selectAll,
-                              onChanged: (bool? value) {
+                              onChanged: (value) {
                                 setModalState(() {
                                   selectAll = value ?? false;
-                                  selectedItems = selectAll ? List.from(values) : [];
+                                  selectedItems = selectAll ? List.from(items) : [];
                                 });
                               },
                             ),
                             const Divider(),
-                            ...values.map((val) {
-                              return CheckboxListTile(
-                                title: Text(val),
-                                value: selectedItems.contains(val),
-                                onChanged: (bool? value) {
-                                  setModalState(() {
-                                    if (value == true) {
-                                      selectedItems.add(val);
-                                    } else {
-                                      selectedItems.remove(val);
-                                      selectAll = false;
-                                    }
-                                  });
-                                },
-                              );
-                            }).toList(),
+                            ...items.map((item) => CheckboxListTile(
+                              title: Text(item),
+                              value: selectedItems.contains(item),
+                              onChanged: (value) {
+                                setModalState(() {
+                                  if (value == true) {
+                                    selectedItems.add(item);
+                                  } else {
+                                    selectedItems.remove(item);
+                                    selectAll = false;
+                                  }
+                                });
+                              },
+                            )),
                             const SizedBox(height: 12),
                             Center(
                               child: ElevatedButton(
@@ -389,9 +353,9 @@ class SearchFiltersPanel extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                (selectedValue == null || selectedValue.trim().isEmpty)
-                    ? label
-                    : selectedValue,
+                (selected == null || selected.trim().isEmpty)
+                    ? hint
+                    : selected,
                 style: const TextStyle(fontWeight: FontWeight.w500),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -403,26 +367,97 @@ class SearchFiltersPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchItem(IconData icon, String title, String hint) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.black54),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.black45)),
-              Text(hint, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
+  Widget _buildPeriodSelector(BuildContext context, List<String> periods) {
+    List<String> selectedItems = List.from(selectedPeriods);
+    bool selectAll = selectedItems.length == periods.length;
+
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+          isScrollControlled: true,
+          builder: (BuildContext context) {
+            return StatefulBuilder(
+              builder: (context, setModalState) {
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: 0.4,
+                  builder: (context, scrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Column(
+                          children: [
+                            CheckboxListTile(
+                              title: const Text("Todos"),
+                              value: selectAll,
+                              onChanged: (value) {
+                                setModalState(() {
+                                  selectAll = value ?? false;
+                                  selectedItems = selectAll ? List.from(periods) : [];
+                                });
+                              },
+                            ),
+                            const Divider(),
+                            ...periods.map((item) => CheckboxListTile(
+                              title: Text(item),
+                              value: selectedItems.contains(item),
+                              onChanged: (value) {
+                                setModalState(() {
+                                  if (value == true) {
+                                    selectedItems.add(item);
+                                  } else {
+                                    selectedItems.remove(item);
+                                    selectAll = false;
+                                  }
+                                });
+                              },
+                            )),
+                            const SizedBox(height: 12),
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  onPeriodChanged(List.from(selectedItems));
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Aplicar"),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                selectedPeriods.isEmpty
+                    ? "Selecciona horario"
+                    : selectedPeriods.join(', '),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
       ),
     );
   }
