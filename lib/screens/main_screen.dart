@@ -7,6 +7,8 @@ import 'package:myapp/api/api_client.dart';
 import 'package:myapp/widgets/custom_app_bar.dart';
 import 'package:myapp/widgets/trip_card.dart';
 import '../widgets/custom_bottom_app_bar.dart';
+import '../helpers/location_helper.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -26,12 +28,14 @@ class _MainScreenState extends State<MainScreen> {
   final double searchBarBottom = kToolbarHeight + 60 + 12;
   String? selectedDestination;
   String? selectedTrain;
-  List<String> selectedPeriods = []; // 🕒 NUEVO
+  List<String> selectedPeriods = [];
+  String? currentCity;
 
   @override
   void initState() {
     super.initState();
     fetchTrips();
+    fetchLocation();
 
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
@@ -41,6 +45,13 @@ class _MainScreenState extends State<MainScreen> {
           });
         }
       }
+    });
+  }
+
+  Future<void> fetchLocation() async {
+    final city = await LocationHelper.getCurrentCity();
+    setState(() {
+      currentCity = city;
     });
   }
 
@@ -139,6 +150,7 @@ class _MainScreenState extends State<MainScreen> {
                       showFilters = !showFilters;
                     });
                   },
+                  originCity: currentCity,
                 ),
               ];
             },

@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
   final VoidCallback? onExpandFilters;
+  final String? originCity;
 
-  const CustomAppBar({Key? key, this.onExpandFilters}) : super(key: key);
+  const CustomAppBar({Key? key, this.onExpandFilters, this.originCity}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
       floating: false,
-      expandedHeight: kToolbarHeight + 20, // Un poquito más alto si quieres
+      expandedHeight: kToolbarHeight + 20,
       collapsedHeight: kToolbarHeight + 20,
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -31,7 +32,10 @@ class CustomAppBar extends StatelessWidget {
               alignment: Alignment.bottomLeft,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                child: SearchBarWidget(onExpandFilters: onExpandFilters),
+                child: SearchBarWidget(
+                  onExpandFilters: onExpandFilters,
+                  originCity: originCity,
+                ),
               ),
             ),
           ],
@@ -43,11 +47,15 @@ class CustomAppBar extends StatelessWidget {
 
 class SearchBarWidget extends StatelessWidget {
   final VoidCallback? onExpandFilters;
+  final String? originCity;
 
-  const SearchBarWidget({Key? key, this.onExpandFilters}) : super(key: key);
+  const SearchBarWidget({Key? key, this.onExpandFilters, this.originCity}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    const String originCity = "Alicante"; //Pruebas
+    final displayText = "${originCity ?? "Tu zona"} to All";
+
     return Row(
       children: [
         Expanded(
@@ -58,12 +66,12 @@ class SearchBarWidget extends StatelessWidget {
               }
             },
             child: Row(
-              children: const [
-                Icon(Icons.search, color: Colors.white, size: 24.0),
-                SizedBox(width: 8.0),
+              children: [
+                const Icon(Icons.search, color: Colors.white, size: 24.0),
+                const SizedBox(width: 8.0),
                 Text(
-                  "Alicante to All",
-                  style: TextStyle(
+                  displayText,
+                  style: const TextStyle(
                     fontSize: 20.0,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
